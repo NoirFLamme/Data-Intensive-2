@@ -1,9 +1,19 @@
 package com.example.ratingsservice.models;
 
-public class Rating {
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
+@Entity
+@Table(name="rating")
+public class Rating {
+    @Id
+    @Column(name = "movieid")
     private String movieId;
+    @Column(name = "rating")
     private int rating;
+
 
     public Rating() {
     }
@@ -28,4 +38,5 @@ public class Rating {
     public void setRating(int rating) {
         this.rating = rating;
     }
+    
 }
