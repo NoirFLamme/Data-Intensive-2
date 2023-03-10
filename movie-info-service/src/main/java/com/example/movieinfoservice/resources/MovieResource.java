@@ -2,6 +2,9 @@ package com.example.movieinfoservice.resources;
 
 import com.example.movieinfoservice.models.Movie;
 import com.example.movieinfoservice.models.MovieSummary;
+import com.example.movieinfoservice.repos.MovieRepo;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +21,9 @@ public class MovieResource {
 
     private RestTemplate restTemplate;
 
+    @Autowired
+    private MovieRepo movieRepo;
+
     public MovieResource(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -25,9 +31,15 @@ public class MovieResource {
     @RequestMapping("/{movieId}")
     public Movie getMovieInfo(@PathVariable("movieId") String movieId) {
         // Get the movie info from TMDB
-        final String url = "https://api.themoviedb.org/3/movie/" + movieId + "?api_key=" + apiKey;
-        MovieSummary movieSummary = restTemplate.getForObject(url, MovieSummary.class);
-
-        return new Movie(movieId, movieSummary.getTitle(), movieSummary.getOverview());
+        if(movieRepo.existsById(movieId)){
+            return movieRepo.findById(movieId).orElseThrow();
+        }
+        else{
+            final String url = "https://api.themoviedb.org/3/movie/" + movieId + "?api_key=" + apiKey;
+            MovieSummary movieSummary = restTemplate.getForObject(url, MovieSummary.class);
+            Movie movie = new Movie(movieId, movieSummary.getTitle(), movieSummary.getOverview());
+            movieRepo.save(movie);
+            return movie;
+        }
     }
 }
